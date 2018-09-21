@@ -3,6 +3,8 @@ html,body {
     height: 100%;
     margin:0; 
 	padding:0;
+}
+body {
 	background: #f9f9f9;
 	font-family: 'Helvetica Neue', sans-serif;
 	color: #003b43; 
@@ -11,9 +13,6 @@ html,body {
 	font-weight: 300; 
 	letter-spacing: 0px;
 	overflow-x:hidden;
-}
-
-body {
     overflow: scroll;
     overflow-x: hidden;
 }
@@ -54,6 +53,14 @@ h5 {
 h6 {
     font-size: 13px;
     margin-bottom: 10px;
+}
+.clearfix {	display: inline-block; }
+.clearfix:after {
+	clear: both;
+	content: '.';
+	display: block;
+	visibility: hidden;
+	height: 0;
 }
 .title-divider {
     border-bottom: 1px solid #e8e8e8;
@@ -99,28 +106,7 @@ h6 {
 .margin-bottom-30 {
 	margin-bottom: 30px;
 }
-.profile-links {
-	color: #fff;
-	font-size: 14px;
-    padding: 5px 10px;
-    display: inline-block;
-	margin-top: 25px;	
-}
-.profile-links a {
-	color: #fff;
-	text-transform: uppercase;
-}
-.profile-links a:hover, .profile-links a.active {
-	color: #ddd;
-}
-.clearfix {	display: inline-block; }
-.clearfix:after {
-	clear: both;
-	content: '.';
-	display: block;
-	visibility: hidden;
-	height: 0;
-}
+.inner-padding { padding: 20px 0; }
 header {
 	padding-top: 20px;
 	background: #6C4D80;
@@ -176,75 +162,7 @@ header .nav-pills li a.active, header .nav-pills li a:hover {
 .right-branding span, .right-branding span a {
 	color: #ddd;
 }
-.panel {
-	border-bottom: 1px solid #ddd;
-}
-.hidden, .hidden_input {
-	display: none;
-}
 
-.form-element,.field-element {
-	width: 74%;
-	min-width: 250px;
-}
-.form-control {
-	box-shadow: none;
-	border-radius: 0;
-	height: 29px;
-	line-height: 30px;
-	font-size: 13px;
-}
-.btn {
-	padding: 4px 12px;
-	font-size: 13px;
-}
-.form-error {
-	display:block;
-	clear: both;
-	color: #dd0025;
-}
-label { display: block; }
-input[type="text"] { width: 100%;}
-input[type="text"], input[type="password"],select,textarea, input[type="search"] {
-	background:#eef3f4;
-	border: 1px solid #A4BED4;
-	border-radius: 0px;
-	-moz-border-radius: 0px;
-	-webkit-border-radius: 0px;
-	padding: .3em;
-}
-input[type="radio"], input[type="checkbox"] {
-	_display: inline;
-}
-textarea {
- 	overflow: auto;
-}
-input.date, input.date-year {
-	background: #eef3f4 url('../img/calendar_hover.jpg') no-repeat right center !important;
-	cursor: pointer;
-	width: 100px;
-}
-input.date:hover, input.date-year:hover {
-	background:#eef3f4 url('../img/calendar.jpg') no-repeat right center !important;
-	cursor: pointer;
-	width: 100px;
-}
-.no-border {
-	border: none;
-}
-.tab-widget .nav {
-    margin:0px;
-}
-#assessment-tabs {
-	margin-bottom: 10px;
-}
-.carousel {
-	height: 300px;
-	margin-bottom: 20px;
-}
-.profile-info {
-    padding: 10px 0px;
-}
 .notes {
 	padding: 0.5em;
 	border: 1px solid #ccc;
@@ -267,75 +185,18 @@ input.date:hover, input.date-year:hover {
 	background: #ebebeb;
 	border-color: #f5dcdd;
 }
-/* Tooltips */
-.tipsy {
-	background : url('../img/tooltip.gif') no-repeat top center;
-	padding : 5px;
+.leaflet-popup-content {
 }
-
-.tipsy-inner {
-	background-color: #002e68;
-	padding: 5px 8px 4px 8px;
-	text-align: center;
-	color: #FFFFFF;
-	font-size : 11px;
-	max-width: 1000px;
+.leaflet-container a.leaflet-popup-close-button {
+	color: red !important;
+	font-weight: 700 !important;
 }
-
-.wrapper-left-bordered {
-	border-left: 1px solid #ddd;
-	padding: 15px;
+.leaflet-popup-content-wrapper {
+	border-radius: 2px  !important;
+	-moz-border-radius: 2px  !important;
+	-webkit-border-radius: 2px  !important;
+	box-shadow:  2px 2px 8px rgba(0.1,0.1,0.1, 0.1) !important;
 }
-
-ul.list-unstyled li {
-	border-bottom: 1px dotted rgba(150, 150, 150, 0.18);
-	display: block;
-	font-size: 13px;
-	font-weight: 400;
-	padding: 8px 0;
-	text-decoration: none;
-	text-transform: uppercase;
-}
-
-.inner-padding { padding: 20px 0; }
-
-.circle {
-	display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    -moz-border-radius: 50%;
-    -web-kit-border-radius: 50%;
-}
-.diamond {
-	display: inline-block;
-    width: 8px;
-    height: 4.4px;
-    position: relative;
-}
-.diamond:before {
-    content: "";
-    position: absolute;
-    top: -2px;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-bottom: 2px solid red;
-}
-.diamond:after {
-    content: "";
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 2px solid red;
-}
-
 footer {
 	text-align: left;
 	padding: 15px 0px;
