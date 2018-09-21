@@ -198,7 +198,7 @@ header .nav-pills li a.active, header .nav-pills li a:hover {
 	box-shadow:  2px 2px 8px rgba(0.1,0.1,0.1, 0.1) !important;
 }
 .leaflet-control-attribution {
-	border: 1px solid #ddd;
+	border: 1px solid #999999;
 }
 footer {
 	text-align: left;

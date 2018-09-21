@@ -33,47 +33,49 @@ var Mapping = {
 	
 	overlays : {
 		country: undefined,
-		incidents: undefined
+		incidents: undefined,
+		legend: undefined,
 	},
 
 	basemaps : {
 		'Openstreetmaps' : undefined
 	},
 
-    checklocalstorage: function(uri) {
-       return window.localStorage.getItem(uri);
-    },
+	checklocalstorage: function(uri) {
+		return window.localStorage.getItem(uri);
+	},
 
-    getlocalstorage: function(uri) {
-        stored_data = this.checklocalstorage(uri)
-        if( stored_data !== null  )
-        {
-            stored_data = JSON.parse(stored_data);
-            this.options.geojson = stored_data.geojson
-            return true;
-        }
-        return this.ajax(uri);
-    },
-    store: function(uri) { 
-        if( this.checklocalstorage(uri) == null )
-            window.localStorage.setItem(uri, JSON.stringify( { geojson: this.options.incidents } ));
+	getlocalstorage: function(uri) {
+		stored_data = this.checklocalstorage(uri)
+		if( stored_data !== null  )
+		{
+			stored_data = JSON.parse(stored_data);
+			this.options.geojson = stored_data.geojson
+			return true;
+		}
+		return this.ajax(uri);
+	},
 
-        return this;
-    },
+	store: function(uri) { 
+		if( this.checklocalstorage(uri) == null )
+			window.localStorage.setItem(uri, JSON.stringify( { geojson: this.options.incidents } ));
+
+		return this;
+	},
 	
 	ajax: function( url, shapefile ) {
-        _data = {};
-        shapefile = shapefile || false;
-        $.ajax({
-            url : ( shapefile == false ? this.options.api.url : this.options.api.shapefilepath ) + url,
-            dataType: "json",
-            async: false,
-            success: function(res) {
-                _data = res;
-            }
-        });
-        this.options.geojson = _data;
-        return this;
+		_data = {};
+		shapefile = shapefile || false;
+		$.ajax({
+			url : ( shapefile == false ? this.options.api.url : this.options.api.shapefilepath ) + url,
+			dataType: "json",
+			async: false,
+			success: function(res) {
+				_data = res;
+			}
+		});
+		this.options.geojson = _data;
+		return this;
 	},
 
 	load : function( uri ) {
@@ -81,10 +83,22 @@ var Mapping = {
 		this.store(uri);
 	},
 	
-	parse: function () {
+	parse: function() {
 		this.options.geojson = JSON.parse(this.options.geojson);
 	},
 	
+	legend: function() {
+		// div = L.DomUtil.create('div', 'info legend');
+		// labels = ['<strong>Categories</strong>'],
+		// categories = ['Road Surface', 'Signage', 'Line Markings', 'Roadside Hazards', 'Other'];
+		// for (var i = 0; i < categories.length; i++) 
+		// {
+		// 	div.innerHTML += labels.push('<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' + (categories[i] ? categories[i] : '+'));
+		// }
+		// div.innerHTML = labels.join('<br>');
+		// this.overlays.legend.onAdd = div;
+	},
+
 	map : function( incident_type ) {
 		_map = L.map( incident_type,	{
 			center: [7.58017, 30.15074],
@@ -100,37 +114,38 @@ var Mapping = {
 		this.overlays.incidents =  L.layerGroup().addTo(_map),
 
 		_controls = new L.Control.Layers(this.basemaps, { 
-				'Country': this.overlays.country, 
-				'Incidents': this.overlays.incidents 
-			}, 
-			{ collapsed: true }
+			'Country': this.overlays.country, 
+			'Incidents': this.overlays.incidents 
+		}, 
+		{ collapsed: true }
 		).addTo(_map);
 		
 		this.basemaps.Openstreetmaps.addTo(_map);
 
-		this.load( incident_type ); //.parse();
-	
+		this.load( incident_type );
+
+		// this.overlays.legend = new L.Control( { position: 'bottomleft' }).addTo(_map);
 
 		L.geoJSON(this.options.geojson, {
-		    style: function (feature) {
-		        return { 
-		        	color: feature.properties.color
-		        };
-		    },
-		    pointToLayer : function(point, latlng) {
-		    	if ( point.properties.icon == 'diamond' )
-		    		_icon = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="25px" viewBox="0 0 250 250" enable-background="new 0 0 250 250" xml:space="preserve"> <g id="Layer_1"></g> <g id="Layer_2"> <polygon fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="15" points="69.445,125 125,28.774 180.556,125 125,221.227 "/> <polygon fill="none" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="10" points="103.008,125 125,86.909 146.992,125 125,163.092 "/> </g></svg>';
-		    	else
-		    		_icon = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"> <circle fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" cx="40" cy="40" r="40"/></svg>';
+			style: function (feature) {
+				return { 
+					color: feature.properties.color
+				};
+			},
+			pointToLayer : function(point, latlng) {
+				if ( point.properties.icon == 'diamond' )
+					_icon = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="25px" viewBox="0 0 250 250" enable-background="new 0 0 250 250" xml:space="preserve"> <g id="Layer_1"></g> <g id="Layer_2"> <polygon fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="15" points="69.445,125 125,28.774 180.556,125 125,221.227 "/> <polygon fill="none" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="10" points="103.008,125 125,86.909 146.992,125 125,163.092 "/> </g></svg>';
+				else
+					_icon = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"> <circle fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" cx="40" cy="40" r="40"/></svg>';
 
-		    	return L.marker(latlng, { 
-		    		icon: L.divIcon({ 
-			    			className: '', 
-			    			html: _icon
-			    		}),
-		    		}
-		    	).bindPopup(point.properties.popupContent);
-		    }
+				return L.marker(latlng, { 
+					icon: L.divIcon({ 
+						className: '', 
+						html: _icon
+					}),
+				}
+				).bindPopup(point.properties.popupContent);
+			}
 		}).addTo(this.overlays.incidents);
 
 		this.shapefile('southsudan');
@@ -142,18 +157,23 @@ var Mapping = {
 
 		L.geoJSON(this.options.geojson, {
 			style : this.options.style,               
-          	onEachFeature: function (feature, layer) {
-	            layer.on({
-	                mouseover : function(e) {
-	                    if('setStyle' in e.target)
-	                        e.target.setStyle({ color: '#3498DB', weight: 2});
-	                },
-	                mouseout : function(e) {
-	                    if('setStyle' in e.target)
-	                        e.target.setStyle({ color: '#999999', weight: 1 });
-	                }
-	            });
-            }
+			onEachFeature: function (feature, layer) {
+				// layer.bindLabel(feature.properties.ADM2_EN, {
+				// 	noHide: true,
+				// 	direction: 'auto'
+				// });
+
+				layer.on({
+					mouseover : function(e) {
+						if('setStyle' in e.target)
+							e.target.setStyle({ color: '#3498DB', weight: 2});
+					},
+					mouseout : function(e) {
+						if('setStyle' in e.target)
+							e.target.setStyle({ color: '#999999', weight: 1 });
+					}
+				});
+			}
 		}).addTo(this.overlays.country);
 	},
 
