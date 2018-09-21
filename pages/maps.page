@@ -1,10 +1,10 @@
 <div class="inner-padding">
 	<div class="row">
 		<div class="col-md-6">
-			<div id="armed-communal-incidents" style="height:500px; width:100%"> </div>
+			<div id="armed-communal-incidents" style="height:600px; width:100%"> </div>
 		</div>
 		<div class="col-md-6">
-			<div id="road-incidents" style="height:500px; width:100%"></div>
+			<div id="road-incidents" style="height:600px; width:100%"></div>
 		</div>
 	</div>
 </div>
@@ -93,7 +93,7 @@ var Mapping = {
 		});
 
 		this.basemaps.Openstreetmaps =  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. The information shown on this map does not imply offical recognition or endorsement of any political boundaries or feature names by the NGO Forum or any other collaborative organization. NGO Forum is not liable for damages of any kind related to the use of this data. Users noting errors or ommisions are encouraged to contact the IM Unit, NGO Forum at support@southsudanngoforum.org'
 		});
 
 		this.overlays.country = L.layerGroup().addTo(_map),
