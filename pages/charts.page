@@ -1,0 +1,278 @@
+<div class="row">
+    <div class="col-md-6">
+        <div id="combined-stack-bar-line" style="width: 100%; height: 400px; margin: 0 auto"></div>
+    </div>
+    <div class="col-md-6">
+        <div id="group-bar-line" style="width: 100%; height: 400px; margin: 0 auto"></div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-md-6">
+		<div id="stacked-bar-chart" style="width: 100%; height: 600px; margin: 0 auto"></div>
+	</div>
+	<div class="col-md-6">
+		<div id="line-chart" style="width: 100%; height: 400px; margin: 0 auto"></div>
+    </div>
+</div>
+
+<script>
+   window.localStorage.clear();     
+var App = {
+    defaults: {
+        url : 'http://192.168.88.19/slim/public/api/incidents/',
+        incidents: [ "damage to facilities/property/assets", "extortion", "accident-fire", "ambush - convoy", "crime - physical assault", "kidnapping/abduction", "unexplained gunfire", "theft", "robbery convoy", "other crime", "crime-other", "crime - robbery", "arrest", "crime - compound intrusion", "harassment" ],
+        loaded: false,
+    },
+    data: {
+        rows: [],
+        incidents: [],
+    },
+    checklocalstorage: function(uri) {
+       return window.localStorage.getItem(uri);
+    },
+    getlocalstorage: function(uri) {
+        stored_data = this.checklocalstorage(uri)
+        if( stored_data !== null  )
+        {
+            stored_data = JSON.parse(stored_data);
+            this.data.rows = stored_data.rows
+            this.data.incidents = stored_data.incidents
+            return true;
+        }
+        return this.ajax(uri);
+    },
+    store: function(uri) { 
+        if( this.checklocalstorage(uri) == null )
+        {
+            chart_data = {
+                rows: this.data.rows,
+                incidents: this.data.incidents
+            };
+            window.localStorage.setItem(uri, JSON.stringify( chart_data ));
+        }
+        return this;
+    },
+    ajax: function (uri) {
+        _data = {};
+        $.ajax({
+            url : this.defaults.url + uri,
+            async: false, 
+            dataType: "json",
+            success: function(res) {
+                _data = res;
+            }
+        });
+        return _data;
+    },
+
+    filter: function()
+    {
+        _default_incidents = this.defaults.incidents;
+        _filtered_incidents = [];
+        this.data.incidents.forEach(function(k) {
+            if ( $.inArray(k.name, _default_incidents) != -1 )
+                _filtered_incidents.push(k);
+        });
+        this.data.incidents = _filtered_incidents;
+    },
+
+    loadData: function ( url, type)
+    {
+        type = type || 'chart'
+        result = this.getlocalstorage( url )
+        if( result !== true )
+        {
+            this.store(url);
+            type == 'combined-chart' ? this.processCombined(result) : this.process( result );
+        }
+        return this;
+    },
+    processCombined: function ( data)
+    {
+        data = data || {};
+
+        // iterate through the logic for combined graphs
+        if(data.hasOwnProperty('all') )
+            this.process(data.all , 'column');
+
+        if( data.hasOwnProperty('fatalities') )
+        {            
+            this.addSpline('fatalities', Object.values(data.fatalities));
+        }
+    },
+    trendline: function() {
+
+    },
+    addSpline: function(title, data ) {
+        this.data.incidents.push({
+            type : 'spline',
+            name : title,
+            data :  data
+        });
+    },
+    process: function ( data , type)
+    {
+        type = type || false;
+        i = 0;
+        _incidents = [], _rows = [];
+        $.each(data, function (_type, incidents) 
+        {
+            if( ! i )
+                _rows = Object.keys(incidents);
+
+            _data = {
+                name : _type,
+                data :  Object.values(incidents)
+            };
+
+            if( type )
+                _data.type = type;
+
+            _incidents.push(_data); 
+            i ++;
+        });
+
+        this.data.rows = _rows;
+        this.data.incidents = _incidents;
+    },
+
+    stacked_bar_chart: function ( param )
+    {
+        this.loadData(param).filter();
+      
+        Highcharts.chart('stacked-bar-chart', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Juba Incidents'
+            },
+            xAxis: {
+                categories: this.data.rows
+            },
+            yAxis: {
+                min: 0,
+                tickInterval: 10,
+                title: {
+                    text: 'Number of Incidents'
+                }
+            },
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+                shared: true
+            },
+            series: this.data.incidents,
+        });
+    },
+
+    line_chart: function ( param )
+    {
+        this.loadData(param);
+
+        Highcharts.chart('line-chart', {
+            title: {
+                text: 'ARMED CLASHES'
+            },
+            xAxis: {
+                categories: this.data.rows
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Clashes'
+                }
+            },
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
+            series: this.data.incidents
+        });
+    },
+
+    combine_bar_line: function ( param )
+    {
+        this.loadData(param, 'combined-chart');
+
+        Highcharts.chart('combined-stack-bar-line', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Road Accidents'
+            },
+            xAxis: {
+                categories: this.data.rows
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Number of Accidents'
+                }
+            },
+            labels: {
+                items: [{
+                    style: {
+                        left: '50px',
+                        top: '18px',
+                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                    }
+                }]
+            },
+            series: this.data.incidents
+        });
+    },
+
+    group_bar_line: function ( param )
+    {
+        this.loadData(param, 'group-bar-line');
+
+        Highcharts.chart('group-bar-line', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Inter Communal Violence'
+            },
+            xAxis: {
+                categories: this.data.rows,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Number of Incidents'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: this.data.incidents
+        });
+    },
+
+    run: function ()
+    {
+        this.stacked_bar_chart('juba');
+
+        this.line_chart('armedclashes');
+
+        this.combine_bar_line('roadaccidents');
+
+        this.group_bar_line('communalviolence');
+    }
+};
+
+App.run();
+</script>

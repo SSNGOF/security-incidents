@@ -1,0 +1,151 @@
+<div class="inner-padding">
+	<div class="row">
+		<div class="col-md-6">
+			<div id="armed-communal-incidents" style="height:500px; width:100%"> </div>
+		</div>
+		<div class="col-md-6">
+			<div id="road-incidents" style="height:500px; width:100%"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+
+// Mapping
+//---------------------------------------------------------------------------------------------------------------
+window.localStorage.clear();
+var Mapping = {
+
+	options: {
+		geojson : {},
+		api : { 
+			url : 'http://192.168.88.19/slim/public/api/incidents/geojson/',
+			shapefilepath : 'shapefiles/',
+		},
+		style : {
+			'color': '#333',
+			'fillColor': '#fff',
+			'weight': 1,
+			'opacity': 0.65,
+			'fillOpacity': 0.65
+		}
+	},
+	
+	overlays : {
+		country: undefined,
+		incidents: undefined
+	},
+
+	basemaps : {
+		'Openstreetmaps' : undefined
+	},
+    checklocalstorage: function(uri) {
+       return window.localStorage.getItem(uri);
+    },
+    getlocalstorage: function(uri) {
+        stored_data = this.checklocalstorage(uri)
+        if( stored_data !== null  )
+        {
+            stored_data = JSON.parse(stored_data);
+            this.options.geojson = stored_data.geojson
+            return true;
+        }
+        return this.ajax(uri);
+    },
+    store: function(uri) { 
+        if( this.checklocalstorage(uri) == null )
+        {
+            window.localStorage.setItem(uri, JSON.stringify( { geojson: this.options.incidents } ));
+        }
+        return this;
+    },
+	ajax: function( url ) {
+        _data = {};
+        $.ajax({
+            url : this.options.api.url + url,
+            dataType: "json",
+            async: false,
+            success: function(res) {
+                _data = res;
+            }
+        });
+        this.options.geojson = _data;
+        return this;
+	},
+	load : function( uri )
+	{
+		this.getlocalstorage(uri)
+		this.store(uri);
+	},
+	parse: function ()
+	{
+		this.options.geojson = JSON.parse(this.options.geojson);
+	},
+	map : function( incident_type ) {
+		_map = L.map( incident_type,	{
+			center: [7.58017, 30.15074],
+			minZoom: 6,
+			zoom: 6,
+		});
+
+		this.basemaps.Openstreetmaps =  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		});
+
+		this.overlays.country = L.layerGroup().addTo(_map),
+		this.overlays.incidents =  L.layerGroup().addTo(_map),
+
+		_controls = new L.Control.Layers(this.basemaps, { 
+				'Country': this.overlays.country, 
+				'Incidents': this.overlays.incidents 
+			}, 
+			{ collapsed: false }
+		).addTo(_map);
+		
+		this.basemaps.Openstreetmaps.addTo(_map);
+
+		this.load( incident_type ); //.parse();
+		
+		L.geoJSON(this.options.geojson, {
+		    style: function (feature) {
+		        return { 
+		        	color: feature.properties.color
+		        };
+		    },
+		    pointToLayer : function(point, latlng) {
+		    	if ( point.properties.icon == 'diamond' )
+		    		_icon = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 250 250" enable-background="new 0 0 250 250" xml:space="preserve"> <g id="Layer_1"></g> <g id="Layer_2"> <polygon fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="10" points="69.445,125 125,28.774 180.556,125 125,221.227 "/> <polygon fill="none" stroke="'+ point.properties.style.color +'" stroke-width="3" stroke-miterlimit="10" points="103.008,125 125,86.909 146.992,125 125,163.092 "/> </g></svg>';
+		    	else
+		    		_icon = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"> <circle fill="'+ point.properties.style.color +'" stroke="'+ point.properties.style.color +'" cx="40" cy="40" r="40"/></svg>';
+
+		    	return L.marker(latlng, { 
+		    		icon: L.divIcon({ 
+			    			className: '', 
+			    			html: _icon
+			    		}),
+		    		}
+		    	).bindPopup(point.properties.popupContent);
+		    }
+		}).addTo(this.overlays.incidents);
+	},
+
+	shapefile: function (url) 
+	{	
+		this.ajax( this.options.api.shapefilepath + url + '.geojson' );
+
+		L.geoJSON(this.options.geojson, {
+			style : this.options.style
+		}).addTo(this.overlays.country);
+	},
+
+	run : function()
+	{
+		// this.shapefile('southsudan')
+		this.map('armed-communal-incidents')
+		this.map('road-incidents')
+	}
+};
+
+Mapping.run();
+
+</script>
