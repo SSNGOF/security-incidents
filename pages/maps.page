@@ -13,9 +13,10 @@ window.localStorage.clear();
 //---------------------------------------------------------------------------------------------------------------
 var Mapping = {
 	options: {
+		uri : undefined,
 		geojson : {},
 		api : { 
-			url : 'http://localhost/slim/public/api/incidents/geojson/',
+			url : 'http://192.168.88.19/slim/public/api/incidents/geojson/',
 			shapefilepath : 'shapefiles/',
 		},
 		style : {
@@ -24,7 +25,8 @@ var Mapping = {
 			'weight': 1,
 			'opacity': 0.65,
 			'fillOpacity': 0.65
-		}
+		},
+		disclaimer : 'The information shown on this map does not imply offical recognition or endorsement of any political boundaries or feature names by the NGO Forum or any other collaborative organization. NGO Forum is not liable for damages of any kind related to the use of this data. Users noting errors or ommisions are encouraged to contact the IM Unit, NGO Forum at support@southsudanngoforum.org.'
 	},
 	overlays : {
 		country: undefined,
@@ -34,40 +36,41 @@ var Mapping = {
 	basemaps : {
 		'Openstreetmaps' : undefined
 	},
-	checklocalstorage: function(uri) {
-		window.localStorage.removeItem(uri);
+	checklocalstorage: function() {
+		window.localStorage.removeItem(this.options.uri);
         _lastclear = localStorage.getItem('_incident_last_clear'),
         _current_time  = (new Date()).getTime();
         // .getTime() returns milliseconds so 1000 * 60 * 60 * 24 = 24 days
-        if ((_current_time - _lastclear) > 1000 * 60 ) {
-            window.localStorage.removeItem(uri);
+        if ((_current_time - _lastclear) > 1000 * 60 ) 
+        {
+            window.localStorage.removeItem(this.options.uri);
             window.localStorage.clear();
             window.localStorage.setItem('_incident_last_clear', _current_time);
         }
-        return window.localStorage.getItem(uri);
+        return window.localStorage.getItem(this.options.uri);
 	},
-	getlocalstorage: function(uri) {
-		stored_data = this.checklocalstorage(uri)
+	getlocalstorage: function() {
+		stored_data = this.checklocalstorage()
 		if( stored_data !== null  )
 		{
 			stored_data = JSON.parse(stored_data);
 			this.options.geojson = stored_data.geojson
 			return true;
 		}
-		return this.ajax(uri);
+		return this.ajax();
 	},
-	store: function(uri) { 
-		if( this.checklocalstorage(uri) == null )
-			window.localStorage.setItem(uri, JSON.stringify( { geojson: this.options.incidents } ));
+	store: function() { 
+		if( this.checklocalstorage(this.options.uri) == null )
+			window.localStorage.setItem(this.options.uri, JSON.stringify( { geojson: this.options.incidents } ));
 
 		return this;
 	},
-	ajax: function( uri, shapefile ) {
+	ajax: function( path ) {
 		_data = {};
-		shapefile = shapefile || false;
-		console.log( (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri.replace(/#/gi, '/#') )
+		path = path || false;
+		url = path !== false  ? this.options.api.shapefilepath + path : this.options.api.url + this.options.uri.replace(/#/gi, '/')
 		$.ajax({
-			url : (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri.replace(/#/gi, '/#'),
+			url : url,
 			dataType: "json",
 			async: false,
 			success: function(res) {
@@ -78,22 +81,22 @@ var Mapping = {
 		return this;
 	},
 	load : function( uri ) {
-		url = uri + '#'+ window.incidents.filter
-		this.getlocalstorage(url)
-		this.store(url);
+		this.options.uri = uri + '#'+ window.incidents.filter;
+		this.getlocalstorage()
+		this.store();
 	},
 	parse: function() {
 		this.options.geojson = JSON.parse(this.options.geojson);
 	},
 	legend: function() {
-		// div = L.DomUtil.create('div', 'info legend');
-		// labels = ['<strong>Categories</strong>'],
-		// categories = ['Road Surface', 'Signage', 'Line Markings', 'Roadside Hazards', 'Other'];
-		// for (var i = 0; i < categories.length; i++) 
-		// {
-		// 	div.innerHTML += labels.push('<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' + (categories[i] ? categories[i] : '+'));
-		// }
-		// div.innerHTML = labels.join('<br>');
+		div = L.DomUtil.create('div', 'info legend');
+		labels = ['<strong>Categories</strong>'],
+		categories = ['Road Surface', 'Signage', 'Line Markings', 'Roadside Hazards', 'Other'];
+		for (var i = 0; i < categories.length; i++) 
+		{
+			div.innerHTML += labels.push('<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' + (categories[i] ? categories[i] : '+'));
+		}
+		div.innerHTML = labels.join('<br>');
 		// this.overlays.legend.onAdd = div;
 	},
 	map : function( incident_type ) {
@@ -104,7 +107,7 @@ var Mapping = {
 		});
 
 		this.basemaps.Openstreetmaps =  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. The information shown on this map does not imply offical recognition or endorsement of any political boundaries or feature names by the NGO Forum or any other collaborative organization. NGO Forum is not liable for damages of any kind related to the use of this data. Users noting errors or ommisions are encouraged to contact the IM Unit, NGO Forum at support@southsudanngoforum.org'
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.' + this.options.disclaimer
 		});
 
 		this.overlays.country = L.layerGroup().addTo(_map),
@@ -149,7 +152,7 @@ var Mapping = {
 	},
 	shapefile: function (uri) 
 	{	
-		this.ajax(  uri + '.geojson', true );
+		this.ajax(  uri + '.geojson' );
 
 		L.geoJSON(this.options.geojson, {
 			style : this.options.style,               
