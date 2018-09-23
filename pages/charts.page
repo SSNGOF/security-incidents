@@ -16,9 +16,10 @@
 </div>
 
 <script>
+window.localStorage.clear();
 var App = {
     defaults: {
-        url : 'http://192.168.88.19/slim/public/api/incidents/',
+        url : 'http://localhost/slim/public/api/incidents/json/',
         incidents: [ "damage to facilities/property/assets", "extortion", "accident-fire", "ambush - convoy", "crime - physical assault", "kidnapping/abduction", "unexplained gunfire", "theft", "robbery convoy", "other crime", "crime-other", "crime - robbery", "arrest", "crime - compound intrusion", "harassment" ],
         loaded: false,
     },
@@ -63,9 +64,8 @@ var App = {
     },
     ajax: function (uri) {
         _data = {};
-        console.log(uri);
         $.ajax({
-            url : this.defaults.url + uri,
+            url : this.defaults.url + uri.replace(/#/gi, '/'),
             async: false, 
             dataType: "json",
             success: function(res) {

@@ -8,7 +8,7 @@
 </div>
 
 <script>
-
+window.localStorage.clear();
 // Mapping
 //---------------------------------------------------------------------------------------------------------------
 var Mapping = {
@@ -36,7 +36,6 @@ var Mapping = {
 	},
 	checklocalstorage: function(uri) {
 		window.localStorage.removeItem(uri);
-
         _lastclear = localStorage.getItem('_incident_last_clear'),
         _current_time  = (new Date()).getTime();
         // .getTime() returns milliseconds so 1000 * 60 * 60 * 24 = 24 days
@@ -65,10 +64,10 @@ var Mapping = {
 	},
 	ajax: function( uri, shapefile ) {
 		_data = {};
-		shapefile = shapefile || false;		
-		console.log(uri);
+		shapefile = shapefile || false;
+		console.log( (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri.replace(/#/gi, '/#') )
 		$.ajax({
-			url : (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri,
+			url : (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri.replace(/#/gi, '/#'),
 			dataType: "json",
 			async: false,
 			success: function(res) {
