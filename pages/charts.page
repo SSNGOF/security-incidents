@@ -6,17 +6,16 @@
         <div id="group-bar-line" style="width: 100%; height: 400px; margin: 0 auto"></div>
     </div>
 </div>
-<div class="row">
-	<div class="col-md-6">
-		<div id="stacked-bar-chart" style="width: 100%; height: 600px; margin: 0 auto"></div>
-	</div>
-	<div class="col-md-6">
-		<div id="line-chart" style="width: 100%; height: 400px; margin: 0 auto"></div>
-    </div>
+<div class="row margin-top-40">
+   <div class="col-md-6">
+      <div id="stacked-bar-chart" style="width: 100%; height: 600px; margin: 0 auto"></div>
+  </div>
+  <div class="col-md-6">
+      <div id="line-chart" style="width: 100%; height: 400px; margin: 0 auto"></div>
+  </div>
 </div>
 
 <script>
-   window.localStorage.clear();     
 var App = {
     defaults: {
         url : 'http://192.168.88.19/slim/public/api/incidents/',
@@ -28,7 +27,17 @@ var App = {
         incidents: [],
     },
     checklocalstorage: function(uri) {
-       return window.localStorage.getItem(uri);
+        window.localStorage.removeItem(uri);
+
+        _lastclear = localStorage.getItem('_incident_last_clear'),
+        _current_time  = (new Date()).getTime();
+        // .getTime() returns milliseconds so 1000 * 60 * 60 * 24 = 24 days
+        if ((_current_time - _lastclear) > 1000 * 60 ) {
+            window.localStorage.removeItem(uri);
+            window.localStorage.clear();
+            window.localStorage.setItem('_incident_last_clear', _current_time);
+        }
+        return window.localStorage.getItem(uri);
     },
     getlocalstorage: function(uri) {
         stored_data = this.checklocalstorage(uri)
@@ -54,6 +63,7 @@ var App = {
     },
     ajax: function (uri) {
         _data = {};
+        console.log(uri);
         $.ajax({
             url : this.defaults.url + uri,
             async: false, 
@@ -64,7 +74,6 @@ var App = {
         });
         return _data;
     },
-
     filter: function()
     {
         _default_incidents = this.defaults.incidents;
@@ -75,9 +84,9 @@ var App = {
         });
         this.data.incidents = _filtered_incidents;
     },
-
-    loadData: function ( url, type)
+    loadData: function ( uri, type)
     {
+        url = uri + '#'+ window.incidents.filter;
         type = type || 'chart'
         result = this.getlocalstorage( url )
         if( result !== true )
@@ -90,7 +99,6 @@ var App = {
     processCombined: function ( data)
     {
         data = data || {};
-
         // iterate through the logic for combined graphs
         if(data.hasOwnProperty('all') )
             this.process(data.all , 'column');
@@ -135,11 +143,10 @@ var App = {
         this.data.rows = _rows;
         this.data.incidents = _incidents;
     },
-
     stacked_bar_chart: function ( param )
     {
         this.loadData(param).filter();
-      
+
         Highcharts.chart('stacked-bar-chart', {
             chart: {
                 type: 'column'
@@ -157,6 +164,15 @@ var App = {
                     text: 'Number of Incidents'
                 }
             },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    dataLabels: {
+                        enabled: true,
+                        color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                    }
+                }
+            },
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
                 shared: true
@@ -164,14 +180,13 @@ var App = {
             series: this.data.incidents,
         });
     },
-
     line_chart: function ( param )
     {
         this.loadData(param);
 
         Highcharts.chart('line-chart', {
             title: {
-                text: 'ARMED CLASHES'
+                text: 'Armed Clashes'
             },
             xAxis: {
                 categories: this.data.rows
@@ -189,7 +204,6 @@ var App = {
             series: this.data.incidents
         });
     },
-
     combine_bar_line: function ( param )
     {
         this.loadData(param, 'combined-chart');
@@ -210,19 +224,18 @@ var App = {
                     text: 'Number of Accidents'
                 }
             },
-            labels: {
-                items: [{
-                    style: {
-                        left: '50px',
-                        top: '18px',
-                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    dataLabels: {
+                        enabled: true,
+                        color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
                     }
-                }]
+                }
             },
             series: this.data.incidents
         });
     },
-
     group_bar_line: function ( param )
     {
         this.loadData(param, 'group-bar-line');
@@ -261,7 +274,6 @@ var App = {
             series: this.data.incidents
         });
     },
-
     run: function ()
     {
         this.stacked_bar_chart('juba');

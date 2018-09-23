@@ -1,11 +1,9 @@
-<div class="inner-padding">
-	<div class="row">
-		<div class="col-md-6">
-			<div id="armed-communal-incidents" style="height:600px; width:100%"> </div>
-		</div>
-		<div class="col-md-6">
-			<div id="road-incidents" style="height:600px; width:100%"></div>
-		</div>
+<div class="row">
+	<div class="col-md-6">
+		<div id="armed-communal-incidents" style="height:600px; width:100%"> </div>
+	</div>
+	<div class="col-md-6">
+		<div id="road-incidents" style="height:600px; width:100%"></div>
 	</div>
 </div>
 
@@ -13,9 +11,7 @@
 
 // Mapping
 //---------------------------------------------------------------------------------------------------------------
-window.localStorage.clear();
 var Mapping = {
-
 	options: {
 		geojson : {},
 		api : { 
@@ -30,21 +26,27 @@ var Mapping = {
 			'fillOpacity': 0.65
 		}
 	},
-	
 	overlays : {
 		country: undefined,
 		incidents: undefined,
 		legend: undefined,
 	},
-
 	basemaps : {
 		'Openstreetmaps' : undefined
 	},
-
 	checklocalstorage: function(uri) {
-		return window.localStorage.getItem(uri);
-	},
+		window.localStorage.removeItem(uri);
 
+        _lastclear = localStorage.getItem('_incident_last_clear'),
+        _current_time  = (new Date()).getTime();
+        // .getTime() returns milliseconds so 1000 * 60 * 60 * 24 = 24 days
+        if ((_current_time - _lastclear) > 1000 * 60 ) {
+            window.localStorage.removeItem(uri);
+            window.localStorage.clear();
+            window.localStorage.setItem('_incident_last_clear', _current_time);
+        }
+        return window.localStorage.getItem(uri);
+	},
 	getlocalstorage: function(uri) {
 		stored_data = this.checklocalstorage(uri)
 		if( stored_data !== null  )
@@ -55,19 +57,18 @@ var Mapping = {
 		}
 		return this.ajax(uri);
 	},
-
 	store: function(uri) { 
 		if( this.checklocalstorage(uri) == null )
 			window.localStorage.setItem(uri, JSON.stringify( { geojson: this.options.incidents } ));
 
 		return this;
 	},
-	
-	ajax: function( url, shapefile ) {
+	ajax: function( uri, shapefile ) {
 		_data = {};
-		shapefile = shapefile || false;
+		shapefile = shapefile || false;		
+		console.log(uri);
 		$.ajax({
-			url : ( shapefile == false ? this.options.api.url : this.options.api.shapefilepath ) + url,
+			url : (( shapefile == false ) ? this.options.api.url : this.options.api.shapefilepath) + uri,
 			dataType: "json",
 			async: false,
 			success: function(res) {
@@ -77,16 +78,14 @@ var Mapping = {
 		this.options.geojson = _data;
 		return this;
 	},
-
 	load : function( uri ) {
-		this.getlocalstorage(uri)
-		this.store(uri);
+		url = uri + '#'+ window.incidents.filter
+		this.getlocalstorage(url)
+		this.store(url);
 	},
-	
 	parse: function() {
 		this.options.geojson = JSON.parse(this.options.geojson);
 	},
-	
 	legend: function() {
 		// div = L.DomUtil.create('div', 'info legend');
 		// labels = ['<strong>Categories</strong>'],
@@ -98,7 +97,6 @@ var Mapping = {
 		// div.innerHTML = labels.join('<br>');
 		// this.overlays.legend.onAdd = div;
 	},
-
 	map : function( incident_type ) {
 		_map = L.map( incident_type,	{
 			center: [7.58017, 30.15074],
@@ -150,7 +148,6 @@ var Mapping = {
 
 		this.shapefile('southsudan');
 	},
-
 	shapefile: function (uri) 
 	{	
 		this.ajax(  uri + '.geojson', true );
@@ -176,14 +173,11 @@ var Mapping = {
 			}
 		}).addTo(this.overlays.country);
 	},
-
 	run : function()
 	{
 		this.map('armed-communal-incidents')
 		this.map('road-incidents')
 	}
 };
-
 Mapping.run();
-
 </script>

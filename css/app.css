@@ -5,7 +5,7 @@ html,body {
 	padding:0;
 }
 body {
-	background: #f9f9f9;
+	background: #ffffff;
 	font-family: 'Helvetica Neue', sans-serif;
 	color: #003b43; 
 	font-size: 12px;
@@ -22,6 +22,7 @@ a {
 	font-weight: normal;
 	text-decoration: none;
 	display: inline-block;
+	outline: none;
 }
 a:hover {
 	color: blue;
@@ -88,6 +89,12 @@ h6 {
 .hue { color: #b95835;  }
 .green {color: #2ecc71; }
 
+.margin-left-40 {
+	margin-left: 40px;
+}
+.margin-left-20 {
+	margin-left: 20px;
+}
 .margin-top-10 {
 	margin-top: 10px;
 }
@@ -105,6 +112,12 @@ h6 {
 }
 .margin-bottom-30 {
 	margin-bottom: 30px;
+}
+.margin-bottom-20 {
+	margin-bottom: 20px;
+}
+.margin-bottom-10 {
+	margin-bottom: 10px;
 }
 .inner-padding { padding: 20px 0; }
 header {
@@ -162,7 +175,22 @@ header .nav-pills li a.active, header .nav-pills li a:hover {
 .right-branding span, .right-branding span a {
 	color: #ddd;
 }
-
+.btn-filter {
+	outline: none;
+	padding: 3px 4px;
+	text-decoration: none;
+	text-transform: uppercase;
+	border: 1px solid #3498DB;
+	margin-right: 2px;
+	font-size: 10px;
+}
+.btn-filter:hover, .current {
+	background: #3498DB;
+	color: #fff;
+	text-decoration: none;
+	text-decoration: none;
+	outline: none;
+}
 .notes {
 	padding: 0.5em;
 	border: 1px solid #ccc;

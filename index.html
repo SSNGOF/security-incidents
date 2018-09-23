@@ -32,6 +32,14 @@
             </ul>
 
             <div class="tab-content">
+                <div class="form-group margin-top-20 margin-bottom-10" id="filter-wrapper">
+                    <a class='btn-filter current'  data-filter='6months' href='#'>6 Months</a>
+
+                    <a class='btn-filter margin-left-20'  data-filter='7days' href='#'>Last 7 days</a>
+                    <a class='btn-filter'  data-filter='1months' href='#'>1 Month</a>
+                    <a class='btn-filter'  data-filter='3months' href='#'>3 Months</a>
+                    <a class='btn-filter'  data-filter='1year' href='#'>1 year</a>
+                </div>
                 <div id="maps" class="tab-pane fade in active "></div>
                 <div id="charts" class="tab-pane fade "></div>
             </div>
@@ -51,12 +59,33 @@
 <link rel="stylesheet" href="js/leaflet/leaflet.label.css" />
 
 <script type="text/javascript">
-   
+    window.incidents = {
+        filter: '6months'
+    };
+
+    $('.btn-filter').on('click', function(e) 
+    {
+        _this = $(this);
+        if( ! _this.hasClass('current') )
+        {
+            $('.btn-filter').removeClass('current');
+            _this.addClass('current');
+            window.incidents.filter = _this.attr('data-filter');
+            
+            boot();
+        }
+        return false;
+    });
+
+    boot();
+
     /** Load tab content
     ------------------------------------------------------------- **/ 
-
-    _active = $('.nav-tabs').find('li.active a');
-    load_page(_active.attr('data-content'), _active.attr('href'));
+    function boot()
+    {
+        _active = $('.nav-tabs').find('li.active a');
+        load_page(_active.attr('data-content'), _active.attr('href'));
+   }
 
     /** Load stacked charts**/
     $('.nav-tabs a').on('click', function(e) 
