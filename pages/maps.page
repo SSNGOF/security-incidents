@@ -157,11 +157,11 @@ var Mapping = {
 		L.geoJSON(this.options.geojson, {
 			style : this.options.style,               
 			onEachFeature: function (feature, layer) {
-				// layer.bindLabel(feature.properties.ADM2_EN, {
-				// 	noHide: true,
-				// 	direction: 'auto'
-				// });
-
+				layer.bindLabel(feature.properties.ADM2_EN, {
+					noHide: true,
+					direction: 'auto'
+				});
+				
 				layer.on({
 					mouseover : function(e) {
 						if('setStyle' in e.target)
